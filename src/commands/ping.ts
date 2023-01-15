@@ -1,6 +1,6 @@
 import { Interaction, SlashCommandBuilder } from "discord.js";
 
-const command = new SlashCommandBuilder().setName("ping").setDescription("Pongs as a reply");
+const data = new SlashCommandBuilder().setName("ping").setDescription("Pongs as a reply");
 
 async function execute(interaction: Interaction) {
     if (!interaction.isChatInputCommand()) return;
@@ -8,4 +8,4 @@ async function execute(interaction: Interaction) {
     return await interaction.reply( {content: "pong!"} );
 }
 
-export default { command, execute };
+export default { data, execute };
