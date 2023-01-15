@@ -4,7 +4,7 @@ const data = new SlashCommandBuilder().setName("server").setDescription("Provide
 
 async function execute(interaction: Interaction) {
     if (!interaction.isChatInputCommand()) return;
-    return interaction.reply(`This server is ${interaction.guild.name} and has ${interaction.guild.memberCount} members.`);
+    return interaction.reply(`This server is ${interaction?.guild?.name} and has ${interaction?.guild?.memberCount} members.`);
 }
 
 export default { data, execute };
