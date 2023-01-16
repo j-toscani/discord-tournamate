@@ -2,10 +2,10 @@ import fs from "fs";
 import path from "path";
 import { Collection } from "discord.js";
 import { Command } from "./types";
+import getCommandFiles from "./getCommandFiles";
 
 const commands: Collection<string, Command> = new Collection();
-const commandsPath = path.join(__dirname, './commands');
-const commandPaths = fs.readdirSync(commandsPath).filter(file => file.includes("."));
+const {commandsPath, commandPaths} = getCommandFiles();
 
 export default function loadCommands() {
   return readCommandsDir(commandsPath, commandPaths);
