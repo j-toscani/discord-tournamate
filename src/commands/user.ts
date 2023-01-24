@@ -1,4 +1,4 @@
-import { Interaction, SlashCommandBuilder } from "discord.js";
+import { Interaction, SlashCommandBuilder } from "npm:discord.js";
 
 const data = new SlashCommandBuilder().setName("user").setDescription("Provides information about the user");
 

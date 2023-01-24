@@ -1,6 +1,6 @@
-import { Client, Events, GatewayIntentBits } from "discord.js";
-import dotenv from "dotenv";
-import loadCommands, {getCommands} from "./loadCommands";
+import { Client, Events, GatewayIntentBits } from "npm:discord.js";
+import dotenv from "npm:dotenv";
+import loadCommands, {getCommands} from "./loadCommands.ts";
 
 dotenv.config();
 
@@ -29,6 +29,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 })
 
 loadCommands()
-  .then(() => { client.login(process.env.BOT_TOKEN); })
+  .then(() => { client.login(Deno.env.get("BOT_TOKEN")); })
   .catch(err => console.error("Could not load commands", err))
 

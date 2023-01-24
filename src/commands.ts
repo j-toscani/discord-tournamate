@@ -1,11 +1,14 @@
-import fs from "fs";
-import path from "path";
-import { Collection } from "discord.js";
-import { Command } from "./types";
+import { join } from "https://deno.land/std@0.57.0/path/mod.ts";
+import { Collection } from "npm:discord.js";
+import { Command } from "./types.ts";
+import getPaths from "./lib/getPaths.ts";
 
 const commands: Collection<string, Command> = new Collection();
-const commandsPath = path.join(__dirname, 'commands');
-const commandPaths = fs.readdirSync(commandsPath).filter(file => file.includes("."));
+const { __dirname } = getPaths(import.meta.url);
+const commandsPath = join(__dirname, "commands");
+const commandPaths = Array.from(Deno.readDirSync(commandsPath))
+  .filter((file) => file.name.includes("."))
+  .map((file) => file.name);
 
 export function loadCommands() {
   return readCommandsDir(commandsPath, commandPaths);
@@ -17,14 +20,15 @@ export function getCommands() {
 
 async function readCommandsDir(commandsPath: string, commandPaths: string[]) {
   for (const file in commandPaths) {
-    const filePath = path.join(commandsPath, file);
+    const filePath = join(commandsPath, file);
     const { default: command } = await import(filePath);
 
-    if ('data' in command && 'execute' in command) {
+    if ("data" in command && "execute" in command) {
       commands.set(command.data.name, command);
     } else {
-      console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+      console.log(
+        `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+      );
     }
   }
 }
-

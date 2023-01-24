@@ -1,6 +1,6 @@
-import { REST, Routes } from 'discord.js';
-import dotenv from "dotenv";
-import getCommandFiles from './getCommandFiles';
+import { REST, Routes } from 'npm:discord.js';
+import dotenv from "npm:dotenv";
+import getCommandFiles from './getCommandFiles.ts';
 
 dotenv.config();
 
@@ -17,7 +17,7 @@ async function loadToJSON() {
 }
 
 // Construct and prepare an instance of the REST module
-const rest = new REST({ version: '10' }).setToken(process.env?.BOT_TOKEN ?? "");
+const rest = new REST({ version: '10' }).setToken(Deno.env.get("BOT_TOKEN") ?? "");
 
 // and deploy your commands!
 (async () => {
@@ -27,11 +27,11 @@ const rest = new REST({ version: '10' }).setToken(process.env?.BOT_TOKEN ?? "");
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(
-			Routes.applicationGuildCommands(process.env?.CLIENT_ID ?? '', process.env?.TEST_GUILD_ID ?? ''),
+			Routes.applicationGuildCommands(Deno.env.get("CLIENT_ID") ?? '', Deno.env.get("TEST_GUILD_ID") ?? ''),
 			{ body: commands },
-		) as any[];
+		);
 
-		console.log(`Successfully reloaded ${data?.length} application (/) commands.`);
+		console.log(`Successfully reloaded ${(data as string[])?.length} application (/) commands.`);
 	} catch (error) {
 		// And of course, make sure you catch and log any errors!
 		console.error(error);
