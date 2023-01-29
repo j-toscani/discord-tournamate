@@ -1,11 +1,9 @@
 import { Client, Events, GatewayIntentBits } from "npm:discord.js";
-import dotenv from "npm:dotenv";
 import loadCommands, {getCommands} from "./src/loadCommands.ts";
-
-dotenv.config();
+import "https://deno.land/x/dotenv/load.ts";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
+console.log(Deno.env.get("BOT_TOKEN"));
 client.once(Events.ClientReady, connectedClient => {
   console.log(`Ready: Logged in as: ${connectedClient.user.tag}`);
 });
