@@ -1,6 +1,7 @@
 import { Client, Events, GatewayIntentBits, Message } from "discord.js";
 import dotenv from "dotenv";
 import fs from "fs/promises";
+import { promisify } from "util";
 import { exec } from "child_process";
 
 import loadCommands, { getCommands } from "./loadCommands";
@@ -18,44 +19,52 @@ const client = new Client({
 });
 
 client.on(Events.MessageCreate, async (message) => {
-  if (message.attachments?.size === 0) return;
+  const MAX_MB = 5;
+  if (message.attachments.size === 0 || message.author.bot) return;
 
-  const attachmentsWithNames = message.attachments.filter(
-    (attachment) => attachment.name
-  );
-
-  for (const [_key, attachment] of attachmentsWithNames) {
+  for (const [_key, attachment] of message.attachments) {
     try {
-      await extractAudioAndReply(attachment, message);
-    } catch (error) {
+      if (checkFileTooBig(attachment, MAX_MB)) {
+        message.channel.send(`Filesize must be below ${MAX_MB}MB.`);
+        continue;
+      }
+
+      const filename = await extractAudio(attachment, message);
+
+      message.channel.send({
+        files: [
+          {
+            name: filename,
+            attachment: filename,
+            description: `Extracted audio from ${attachment.name}`,
+          },
+        ],
+      });
+    
+      await fs.rm(filename);
+    } catch (error: any) {
       console.error(error);
       message.channel.send(
-        `I was not able to extract the audio from ${attachment.name}`
+        `I was not able to extract the audio from ${attachment.name}.`
       );
     }
   }
 });
 
-async function extractAudioAndReply(attachment: Attachment, message: Message) {
+function checkFileTooBig(attachment: Attachment, maxMb: number = 5) {
+  const fileSizeInMb = attachment.size / 1024 / 1000;
+  return fileSizeInMb > maxMb;
+}
+
+async function extractAudio(attachment: Attachment, message: Message) {
   const audioFileName = `${attachment.name.split(".")[0]}.mp3`;
-  const buffer = await (await fetch(attachment.proxyURL)).arrayBuffer();
-  await fs.writeFile(attachment.name, Buffer.from(buffer));
+  const cmd = `ffmpeg -i ${attachment.proxyURL} ${audioFileName}`;
 
-  const cmd = `ffmpeg -i ${attachment.name} ${audioFileName}`;
+  const promiseExecute = promisify(exec);
 
-  exec(cmd, (err) => {
-    if (err) throw new Error("Could not convert video file.");
+  await promiseExecute(cmd);
 
-    message.channel.send({
-      files: [
-        {
-          name: audioFileName,
-          attachment: audioFileName,
-          description: `Extracted audio from ${attachment.name}`,
-        },
-      ],
-    });
-  });
+  return audioFileName;
 }
 
 client.once(Events.ClientReady, (connectedClient) => {
